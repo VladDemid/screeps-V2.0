@@ -1,0 +1,90 @@
+var miner_spot_x = 32,
+    miner_spot_y = 38;
+
+var roleMiner = {
+
+    run: function(creep, extensions_energy, extensions_mass) {
+        // --miner logic start--
+        
+        if (creep.carry.energy == 0) {
+            creep.memory.mining = true;
+            creep.memory.building = false;
+            creep.memory.carry = false;
+            
+        } else if (creep.carry.energy == creep.carryCapacity) {
+            creep.memory.mining = false;
+            creep.memory.building = true;
+            creep.memory.carry = true;
+            
+        }           
+        
+        // if () {}
+        
+        
+        // console.log(creep.name, " carrying = ",carrying, " mining = ",mining);
+        
+        if (creep.memory.mining) {
+            creep.say("⛏");
+            if (creep.carry.energy < creep.carryCapacity) {
+                var sources = creep.room.find(FIND_SOURCES);
+                
+                var dest_mining = 1;
+                if (creep.name.split('Miner')[1] % 3 == 0) {
+                    dest_mining = 0;
+                }
+                
+                if (creep.harvest(sources[dest_mining]) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(sources[dest_mining]);
+                }
+            } 
+        // транспортировка
+        } else if (creep.room.energyAvailable < creep.room.energyCapacityAvailable /*&& !(creep.name.split('Miner')[1] % 6 == 0)*/) {
+            if (Game.spawns.Spawn1.store[RESOURCE_ENERGY] < 300) { 
+                creep.say("🚛");
+                if (creep.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(Game.spawns['Spawn1']);
+                }
+            } else if (extensions_mass && extensions_mass[0].energy < extensions_mass[0].energyCapacity) {
+                // console.log("extensions energy low");
+                creep.say("📀");
+                const range_1_str = creep.pos.findInRange(FIND_MY_STRUCTURES, 1);
+                if  (range_1_str) {
+                    for (var y = 0; y < range_1_str.length;y++) {
+                        if (range_1_str[y].structureType == STRUCTURE_EXTENSION && range_1_str[y].energy < range_1_str[y].energyCapacity) {
+                            creep.transfer(range_1_str[y], RESOURCE_ENERGY);
+                        }
+                    }
+                }
+                const target_near_ext = creep.pos.findClosestByRange(FIND_STRUCTURES,
+                    {filter: {structureType: STRUCTURE_EXTENSION}});
+                if(target_near_ext && target_near_ext.store < target_near_ext.storeCapacity) {
+                        if(creep.transfer(target_near_ext) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(target_near_ext);
+                        } 
+                } else { //????
+                    if(creep.transfer(extensions_mass[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(extensions_mass[0]);
+                    } //????
+                }
+            }
+        // строительство
+        } else if (creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES)) {
+            creep.say("🧱");
+            const target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
+            if(creep.build(target) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target);
+            }   else {creep.build(target);}
+        } else if (creep.carry.energy < creep.carryCapacity) {
+            creep.memory.mining = true;
+        } else {
+            creep.say("🚬");
+            creep.moveTo(miner_spot_x, miner_spot_y);
+        }
+        // console.log(extensions_energy);
+        // --miner logic end--
+        
+    }
+};
+
+module.exports = roleMiner;
+
