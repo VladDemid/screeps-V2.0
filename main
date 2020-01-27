@@ -1,0 +1,105 @@
+var mining_max, upgrader_max, defender_max, fixer_max,
+    spawning_lvl = 1,
+    
+    extensions_energy = 0,
+    
+    functions = require("functions"),
+    roleMiner = require("miner_role"),
+    roleUpgrader = require("upgrader_role"),
+    roleDefender = require("defender_role");
+    roleFixer = require("fixer_role");
+
+module.exports.loop = function () {
+    
+    //определить в будущем spawning_lvl тут, и все mining_max... 
+    var mining_count = 0,
+        upgrader_count = 0,
+        fixer_count = 0,
+        defender_count = 0;
+        
+    var extensions_mass = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_EXTENSION}});
+        extensions_mass.sort((a,b) => a.energy - b.energy);
+        for (var exs = 0; exs < extensions_mass.length; exs++) {
+            extensions_energy = extensions_energy + extensions_mass[exs].energy;
+        }
+    var ext_count = extensions_mass.length;
+    if (ext_count && 5 <= ext_count && ext_count <= 9) {
+        spawning_lvl = 2;
+    }  
+    console.log(extensions_mass.length, (ext_count && 5 <= ext_count && ext_count <= 9));
+    switch (spawning_lvl) {
+        case 1:
+            mining_max = 6,
+            defender_max = 4,
+            upgrader_max = 1,
+            fixer_max = 2;
+            break;
+        case 2:
+            mining_max = 7,
+            defender_max = 4,
+            upgrader_max = 2,
+            fixer_max = 2;
+            break;
+    }
+    
+    for (var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        
+        if (creep.memory.role == "miner") {
+            mining_count++;
+            roleMiner.run(creep, extensions_energy, extensions_mass);
+        } else if (creep.memory.role == "defender") {
+            defender_count++;
+            roleDefender.run(creep);
+        } else if (creep.memory.role == "upgrader") {
+            upgrader_count++;
+            roleUpgrader.run(creep);
+        } else if (creep.memory.role == "fixer") {
+            fixer_count++;
+            roleFixer.run(creep);
+        } else {creep.say("who i am?");}
+    }
+    if (spawning_lvl == 1) { //дефолт
+        if (Game.spawns.Spawn1.room.energyAvailable >= 300) {
+            if (mining_count < mining_max) {
+                console.log("--MINING spawn--");
+                functions.spawn_creep("Miner", mining_max, spawning_lvl);
+            } else if (defender_count < defender_max) {
+                console.log("--DEFENDER spawn--");
+                functions.spawn_creep("Defender", defender_max, spawning_lvl);
+            } else if (upgrader_count < upgrader_max) {
+                console.log("--UPGRADER spawn--");
+                functions.spawn_creep("Upgrader", upgrader_max, spawning_lvl);
+            } else if (fixer_count < fixer_max) {
+                console.log("--FIXER spawn--");
+                functions.spawn_creep("Fixer", fixer_max, spawning_lvl);
+            }
+        }
+    } else if (spawning_lvl == 2) {
+        if (Game.spawns.Spawn1.room.energyAvailable >= 550) {
+            if (mining_count < mining_max) {
+                console.log("--MINING spawn--");
+                functions.spawn_creep("Miner", mining_max, spawning_lvl);
+            } else if (defender_count < defender_max) {
+                console.log("--DEFENDER spawn--");
+                functions.spawn_creep("Defender", defender_max, spawning_lvl);
+            } else if (upgrader_count < upgrader_max) {
+                console.log("--UPGRADER spawn--");
+                functions.spawn_creep("Upgrader", upgrader_max, spawning_lvl);
+            } else if (fixer_count < fixer_max) {
+                console.log("--FIXER spawn--");
+                functions.spawn_creep("Fixer", fixer_max, spawning_lvl);
+            }
+        }
+    }
+    // functions.cpu_used();
+    // console.log(Game.creeps["Fixer1"].memory.role);
+}
+
+
+
+
+
+//чистить память Memory.creeps.*
+
+functions.cpu_used()
