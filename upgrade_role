@@ -1,0 +1,39 @@
+var dest_upgr = 0; //откуда сосать
+
+var roleUpgrader = {
+
+    run: function(creep) {
+        // --upgrader logic start--
+        creep.say("🔋");
+        
+        if (creep.carry.energy == creep.carryCapacity) {
+            creep.memory.upgrading_now = true;
+        }
+        if (creep.carry.energy == 0) {
+            creep.memory.upgrading_now = false;
+        }
+        
+        if (creep.name.split('Upgrader')[1] % 2 == 0) {
+            dest_upgr = 0;
+        }
+        if (creep.carry.energy < creep.carryCapacity && creep.memory.upgrading_now == false) {
+            var sources = Game.rooms["W15S39"].find(FIND_SOURCES);
+            if (creep.harvest(sources[dest_upgr]) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(sources[dest_upgr])
+            }
+        } else {
+            var controller = Game.rooms["W15S39"].controller;
+            if (creep.upgradeController(controller) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(controller);
+            }
+        }
+        
+        // --upgrader logic end--
+        
+    }
+};
+
+module.exports = roleUpgrader;
+
+
+
