@@ -1,0 +1,105 @@
+var cpu_avg = 0,
+    cpu_i = 1;
+
+module.exports.create_name = function create_name(role, max_role_creeps) {
+    var export_name;
+    do {
+        export_name = role + this.random_Integer(1, max_role_creeps);
+    } while (Game.creeps[export_name]);
+    return export_name;
+}
+
+module.exports.show_time = function show_time() {
+    console.log('             -- ', Date().split('2020')[1].split('GMT')[0], " --");
+}
+
+// CPU на каждую профессию
+
+module.exports.random_Integer = function random_Integer(min, max) {
+  // случайное число от min до (max+1)
+  let rand = min + Math.random() * (max + 1 - min);
+  return Math.floor(rand);
+}    
+
+module.exports.energy_information = function energy_information() {
+  console.log("spawn: ", );
+  console.log(extensions_energy, " energy in ", extensions_mass.length, " extensions");
+}  
+
+
+module.exports.cpu_used = function cpu_used() {
+    const n = 20;
+    // console.log("this tick cpu used: ", Game.cpu.getUsed().toFixed(2));
+    cpu_avg = cpu_avg + Game.cpu.getUsed(); 
+    if (cpu_i >= n) {
+        console.log('last 20 ticks cpu_avg usage: '+ (cpu_avg/n).toFixed(2));
+        cpu_i = 1;
+        cpu_avg = 0;
+    }
+    cpu_i++;
+}
+
+
+module.exports.spawn_creep = function spawn_creep(role, max_role_creeps, spawn_lvl) {
+    if (spawn_lvl == 1) {
+        console.log("1 spawn lvl");
+        switch (role) {
+            case "Miner":
+                var temp_name = this.create_name("Miner", max_role_creeps);
+                Game.spawns.Spawn1.spawnCreep([WORK,CARRY,CARRY,MOVE,MOVE], temp_name);
+                Game.creeps[temp_name].memory.role = "miner";
+                break;
+            case "Defender":
+                var temp_name = this.create_name("Defender", max_role_creeps);
+                Game.spawns.Spawn1.spawnCreep([TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,ATTACK,ATTACK], temp_name);
+                Game.creeps[temp_name].memory.role = "defender";
+                break;
+            case "Upgrader":
+                var temp_name = this.create_name("Upgrader", max_role_creeps);
+                Game.spawns.Spawn1.spawnCreep([WORK, WORK, CARRY, MOVE], temp_name);
+                Game.creeps[temp_name].memory.role = "upgrader";
+                break;
+            case "Fixer":
+                var temp_name = this.create_name("Fixer", max_role_creeps);
+                Game.spawns.Spawn1.spawnCreep([WORK, CARRY, CARRY, MOVE, MOVE], temp_name);
+                Game.creeps[temp_name].memory.role = "fixer";
+                break;
+            default:
+                console.log("spawning error!!");
+                break;
+        }
+    } else if (spawn_lvl == 2) {
+        console.log("2 spawn lvl");
+        switch (role) {
+            case "Miner":
+                var temp_name = this.create_name("Miner", max_role_creeps);
+                Game.spawns.Spawn1.spawnCreep([WORK,WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], temp_name);
+                Game.creeps[temp_name].memory.role = "miner";
+                break;
+            case "Defender":
+                var temp_name = this.create_name("Defender", max_role_creeps);
+                Game.spawns.Spawn1.spawnCreep([TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,ATTACK,ATTACK,ATTACK], temp_name);
+                Game.creeps[temp_name].memory.role = "defender";
+                break;
+            case "Upgrader":
+                var temp_name = this.create_name("Upgrader", max_role_creeps);
+                Game.spawns.Spawn1.spawnCreep([WORK,WORK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE], temp_name);
+                Game.creeps[temp_name].memory.role = "upgrader";
+                break;
+            case "Fixer":
+                var temp_name = this.create_name("Fixer", max_role_creeps);
+                Game.spawns.Spawn1.spawnCreep([WORK,WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], temp_name);
+                Game.creeps[temp_name].memory.role = "fixer";
+                break;
+            default:
+                console.log("spawning error!!");
+                break;
+        }
+    } else {
+        console.log(console.log("wrong spawning lvl"));
+    }
+    
+}
+
+
+
