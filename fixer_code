@@ -1,0 +1,115 @@
+var cur_target_id,
+    cur_target_id2,
+    support_spot_x = 42,
+    support_spot_y = 33; //место базирования
+
+var roleFixer = {
+
+    run: function(creep) {
+        // --fixer logic start--
+        creep.say('🔧'); 
+        
+            if (creep.carry.energy == 0) {creep.memory.fixing = false;}
+            if (creep.carry.energy == creep.carryCapacity) {creep.memory.fixing = true;}
+            var fixer_mode = 1,
+                dest_mining = 0;
+            if (creep.name.split('Fixer')[1] % 2 == 0) {
+                fixer_mode = 2;
+                dest_mining = 1;
+            }
+            
+            
+            if (creep.memory.fixing == false) {
+                 var sources = creep.room.find(FIND_SOURCES);
+                    if (creep.harvest(sources[dest_mining]) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(sources[dest_mining])
+                    }
+            } else {
+                if (fixer_mode == 1 ) {
+                    creep.say('🔧1'); 
+                    //-------------------- искать ближайшие структуры
+                    const range_3_str = creep.pos.findInRange(FIND_STRUCTURES, 3, { //найти hits - min
+                        filter: object => object.hits < object.hitsMax 
+                    });
+                    if  (range_3_str) {
+                        // console.log(range_3_str[0].hits);
+                        for (var z = 0; z < range_3_str.length;z++) {
+                            if (range_3_str[z].hits < range_3_str[z].hitsMax) {
+                                creep.repair(range_3_str[z]);
+                            }
+                        }
+                    }
+                    //------------------- искать ближайшие структуры
+                    //если в процессе починки
+                    if (Game.getObjectById(cur_target_id) && Game.getObjectById(cur_target_id).hits < 5000 && creep.repair(Game.getObjectById(cur_target_id)) == OK) {
+                        if(creep.repair(Game.getObjectById(cur_target_id)) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(Game.getObjectById(cur_target_id));
+                        }
+                    } else {
+                        const targets = Game.rooms["W15S39"].find(FIND_STRUCTURES, { //найти hits - min
+                            filter: object => object.hits < object.hitsMax 
+                        });
+                        targets.sort((a,b) => a.hits - b.hits);
+                        if (targets.length > 0) {cur_target_id = targets[0].id;}
+                        if(targets.length > 0 && targets[0].hits < 5000) {
+                            if(creep.repair(targets[0]) == ERR_NOT_IN_RANGE) {
+                                 creep.moveTo(targets[0]);
+                                //  console.log('цель починки: ',cur_repair.pos,' ',cur_repair.hits,' hits' ); 
+                            } 
+                        } else {creep.moveTo(support_spot_x, support_spot_y)}
+                    }
+                } else if (fixer_mode == 2) {
+                    creep.say('🔧2'); 
+                    if (Game.getObjectById(cur_target_id2) && Game.getObjectById(cur_target_id2).hits < 200000 && creep.repair(Game.getObjectById(cur_target_id2)) == OK && Game.getObjectById(cur_target_id2).hits < Game.getObjectById(cur_target_id2).hitsMax) {
+                    if(creep.repair(Game.getObjectById(cur_target_id2)) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(Game.getObjectById(cur_target_id2));
+                    }
+                    } else {
+                        const targets = creep.room.find(FIND_STRUCTURES, {
+                            filter: object => object.hitsMax > 5000 && object.hits < object.hitsMax && object.hitsMax < 300000000
+                        });
+                        targets.sort((a,b) => a.hits - b.hits);
+                        if (targets.length > 0) {cur_target_id2 = targets[0].id}
+                        if(targets.length > 0 && targets[0].hits < 190000 /*&& towers_mass[0].energy <= 500*/ && targets[0].hits < targets[0].hitsMax) {
+                            if(creep.repair(targets[0]) == ERR_NOT_IN_RANGE) {
+                                creep.moveTo(targets[0]);
+                            }
+                        } else {
+                            creep.moveTo(support_spot_x, support_spot_y);
+                        }
+                    }
+                }
+            } 
+        
+        
+        // --fixer logic end--
+        
+    }
+};
+
+module.exports = roleFixer;
+
+
+
+
+// creep.say('🔧2'); 
+// if (Game.getObjectById(cur_target_id2) && Game.getObjectById(cur_target_id2).hits < 30000 && creep.repair(Game.getObjectById(cur_target_id2)) == OK && Game.getObjectById(cur_target_id2).hits < Game.getObjectById(cur_target_id2).hitsMax) {
+// if(creep.repair(Game.getObjectById(cur_target_id2)) == ERR_NOT_IN_RANGE) {
+//     creep.moveTo(Game.getObjectById(cur_target_id2));
+// }
+// } else {
+//     const targets = creep.room.find(FIND_STRUCTURES, {
+//         filter: object => object.hitsMax > 5000 && object.structureType == STRUCTURE_CONTAINER && object.hits < object.hitsMax /*&& object.hitsMax < 300000000*/
+//     });
+//     targets.sort((a,b) => a.hits - b.hits);
+//     if (targets.length > 0) {cur_target_id2 = targets[0].id}
+//     if(targets.length > 0 && targets[0].hits < 31000 /*&& towers_mass[0].energy <= 500*/ && targets[0].hits < targets[0].hitsMax) {
+//         if(creep.repair(targets[0]) == ERR_NOT_IN_RANGE) {
+//             creep.moveTo(targets[0]);
+//         }
+//     } else {
+//         creep.moveTo(support_spot_x, support_spot_y);
+//     }
+// }
+
+
