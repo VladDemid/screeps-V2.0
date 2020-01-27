@@ -1,0 +1,26 @@
+var defender_spot_x = 35,
+    defender_spot_y = 30; //место базирования
+
+var roleDefender = {
+
+    run: function(creep) {
+        // --defender logic start--
+        const target = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        if(target) {
+            creep.say("⚔️");
+            if(creep.attack(target) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target);
+            }
+        } else {
+            creep.moveTo(defender_spot_x, defender_spot_y)
+            creep.say("🚬");
+        }
+        
+        // --defender logic end--
+        
+    }
+};
+
+module.exports = roleDefender;
+
+
